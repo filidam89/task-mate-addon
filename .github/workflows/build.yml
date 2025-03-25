@@ -31,4 +31,4 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ github.repository_owner }}/hassio-taskmate:latest
+          tags: ghcr.io/filidam89/hassio-taskmate:latest
