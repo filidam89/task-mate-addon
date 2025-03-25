@@ -10,6 +10,7 @@ export interface Task {
   title: string;
   description?: string;
   assignedTo: Person;
+  confirmedBy?: Person; // New field to track who actually completed the task
   frequency: Frequency;
   customFrequency?: string;
   completed: boolean;
@@ -23,7 +24,7 @@ interface TaskContextType {
   addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
-  toggleComplete: (id: string) => void;
+  toggleComplete: (id: string, confirmedBy?: Person) => void; // Updated to accept confirmedBy
   filterByPerson: Person | 'All';
   setFilterByPerson: (person: Person | 'All') => void;
   getPointsByPerson: () => { personA: number, personB: number, difference: number };
@@ -76,11 +77,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success("Task deleted");
   };
 
-  const toggleComplete = (id: string) => {
+  const toggleComplete = (id: string, confirmedBy?: Person) => {
     setTasks((prev) => 
-      prev.map((task) => 
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
+      prev.map((task) => {
+        if (task.id === id) {
+          const isCompleting = !task.completed;
+          // When completing, set confirmedBy if provided or use assignedTo as default
+          // When uncompleting, remove confirmedBy
+          return { 
+            ...task, 
+            completed: isCompleting,
+            confirmedBy: isCompleting ? confirmedBy || task.assignedTo : undefined
+          };
+        }
+        return task;
+      })
     );
   };
 
@@ -91,11 +102,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let personBPoints = 0;
     
     completedTasks.forEach(task => {
-      if (task.assignedTo === 'A') {
+      const person = task.confirmedBy || task.assignedTo;
+      
+      if (person === 'A') {
         personAPoints += task.points || 0;
-      } else if (task.assignedTo === 'B') {
+      } else if (person === 'B') {
         personBPoints += task.points || 0;
-      } else if (task.assignedTo === 'Both') {
+      } else if (person === 'Both') {
         // Split points for tasks assigned to both
         personAPoints += (task.points || 0) / 2;
         personBPoints += (task.points || 0) / 2;
