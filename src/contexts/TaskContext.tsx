@@ -15,6 +15,7 @@ export interface Task {
   completed: boolean;
   dueDate: string;
   createdAt: string;
+  points: number;
 }
 
 interface TaskContextType {
@@ -25,6 +26,7 @@ interface TaskContextType {
   toggleComplete: (id: string) => void;
   filterByPerson: Person | 'All';
   setFilterByPerson: (person: Person | 'All') => void;
+  getPointsByPerson: () => { personA: number, personB: number, difference: number };
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -82,6 +84,31 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  const getPointsByPerson = () => {
+    const completedTasks = tasks.filter(task => task.completed);
+    
+    let personAPoints = 0;
+    let personBPoints = 0;
+    
+    completedTasks.forEach(task => {
+      if (task.assignedTo === 'A') {
+        personAPoints += task.points || 0;
+      } else if (task.assignedTo === 'B') {
+        personBPoints += task.points || 0;
+      } else if (task.assignedTo === 'Both') {
+        // Split points for tasks assigned to both
+        personAPoints += (task.points || 0) / 2;
+        personBPoints += (task.points || 0) / 2;
+      }
+    });
+    
+    return {
+      personA: personAPoints,
+      personB: personBPoints,
+      difference: personAPoints - personBPoints
+    };
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -91,7 +118,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteTask,
         toggleComplete,
         filterByPerson,
-        setFilterByPerson
+        setFilterByPerson,
+        getPointsByPerson
       }}
     >
       {children}

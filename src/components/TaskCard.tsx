@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Clock, User } from 'lucide-react';
+import { MoreHorizontal, Clock, User, Award } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,12 +60,21 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
             />
             
             <div className="flex-1">
-              <h3 className={cn(
-                "font-medium text-lg transition-all",
-                task.completed && "line-through text-muted-foreground"
-              )}>
-                {task.title}
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className={cn(
+                  "font-medium text-lg transition-all",
+                  task.completed && "line-through text-muted-foreground"
+                )}>
+                  {task.title}
+                </h3>
+                <Badge 
+                  variant="outline" 
+                  className="flex items-center gap-1 bg-primary/10 text-primary ml-2"
+                >
+                  <Award size={12} />
+                  {task.points || 1} {task.points === 1 ? 'point' : 'points'}
+                </Badge>
+              </div>
               
               {task.description && (
                 <p className="text-muted-foreground text-sm mt-1">

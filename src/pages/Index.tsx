@@ -5,12 +5,23 @@ import TaskCard from '@/components/TaskCard';
 import PersonFilter from '@/components/PersonFilter';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
+import { Search, Award, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
-  const { tasks, filterByPerson } = useTaskContext();
+  const { tasks, filterByPerson, getPointsByPerson } = useTaskContext();
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Get point statistics
+  const { personA, personB, difference } = getPointsByPerson();
+  
+  // Determine who's ahead
+  const getScoreIcon = () => {
+    if (difference > 0) return <TrendingUp className="h-5 w-5 text-green-500" />;
+    if (difference < 0) return <TrendingDown className="h-5 w-5 text-red-500" />;
+    return <Minus className="h-5 w-5 text-gray-500" />;
+  };
   
   // Filter tasks based on the selected person
   const filteredByPerson = tasks.filter(task => {
@@ -30,6 +41,36 @@ const Index = () => {
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
+        {/* Points Summary Card */}
+        <Card className="glass-card overflow-hidden w-full mb-6 transition-all animate-scale-in">
+          <CardContent className="p-4">
+            <h3 className="font-medium text-lg mb-3 flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              Points Summary
+            </h3>
+            
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="flex flex-col">
+                <span className="text-sm text-muted-foreground">Person A</span>
+                <span className="text-2xl font-bold">{personA.toFixed(1)}</span>
+              </div>
+              
+              <div className="flex flex-col items-center">
+                <span className="text-sm text-muted-foreground">Difference</span>
+                <div className="flex items-center gap-1">
+                  {getScoreIcon()}
+                  <span className="text-xl font-bold">{Math.abs(difference).toFixed(1)}</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-sm text-muted-foreground">Person B</span>
+                <span className="text-2xl font-bold">{personB.toFixed(1)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input

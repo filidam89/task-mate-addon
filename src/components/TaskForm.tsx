@@ -37,6 +37,7 @@ const formSchema = z.object({
   frequency: z.enum(['Daily', 'Weekly', 'Monthly', 'Custom']),
   customFrequency: z.string().optional(),
   dueDate: z.date(),
+  points: z.coerce.number().min(0, 'Points must be a positive number').default(1),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,6 +59,7 @@ const TaskForm: React.FC = () => {
       frequency: task?.frequency || 'Daily',
       customFrequency: task?.customFrequency || '',
       dueDate: task?.dueDate ? new Date(task.dueDate) : new Date(),
+      points: task?.points || 1,
     }
   });
   
@@ -73,6 +75,7 @@ const TaskForm: React.FC = () => {
         customFrequency: data.frequency === 'Custom' ? data.customFrequency : undefined,
         dueDate: data.dueDate.toISOString(),
         completed: task?.completed || false,
+        points: data.points,
       };
       
       if (isEditMode && task) {
@@ -200,6 +203,27 @@ const TaskForm: React.FC = () => {
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="points"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Points (1-10)</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    min="1" 
+                    max="10"
+                    placeholder="Points value" 
+                    {...field} 
+                    className="glass-effect focus-ring"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
           <FormField
             control={form.control}
